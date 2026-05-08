@@ -1,0 +1,1211 @@
+{
+  "name": "Automotive Agent Final",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "automotive-lead",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [
+        -480,
+        -192
+      ],
+      "id": "ae402164-ce11-44c9-880f-b28bd5eb5097",
+      "name": "Lead Intake Webhook",
+      "webhookId": "auto-lead-001"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "name",
+              "value": "={{ $json.body.name }}",
+              "type": "string"
+            },
+            {
+              "id": "a2",
+              "name": "Budget",
+              "value": "={{ $json.body.Budget }}",
+              "type": "string"
+            },
+            {
+              "id": "a3",
+              "name": "Type",
+              "value": "={{ $json.body.Type }}",
+              "type": "string"
+            },
+            {
+              "id": "a4",
+              "name": "Purpose",
+              "value": "={{ $json.body.Purpose }}",
+              "type": "string"
+            },
+            {
+              "id": "a5",
+              "name": "email",
+              "value": "={{ $json.body.email }}",
+              "type": "string"
+            },
+            {
+              "id": "a6",
+              "name": "phone",
+              "value": "={{ $json.body.phone }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -256,
+        -192
+      ],
+      "id": "df08176e-dc7b-42e7-bbb3-6c7ad29e5034",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "groqApi",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "JSON",
+        "body": "={{ {\n  model: \"llama-3.3-70b-versatile\",\n  messages: [\n    {\n      role: \"user\",\n      content: `You are an expert Indian car advisor. Suggest best ${$node[\"Edit Fields\"].json.Type} under ${$node[\"Edit Fields\"].json.Budget} for ${$node[\"Edit Fields\"].json.Purpose}.`\n    }\n  ],\n  temperature: 0.7\n} }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -32,
+        -192
+      ],
+      "id": "6c8c6b11-250e-472e-ad87-fd31dda7066d",
+      "name": "Car_Recommender",
+      "credentials": {
+        "groqApi": {
+          "id": "K88czJwDkSJy0RCS",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "08f2e4b8-1975-4577-b16a-5055b52bddef",
+              "name": "name",
+              "value": "={{$node[\"Edit Fields\"].json[\"name\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "3cc2e7c0-07a2-4501-80d4-3c39d830ec98",
+              "name": "Budget",
+              "value": "={{$node[\"Edit Fields\"].json[\"Budget\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "a4b0a084-4ab5-4b42-9d09-da5fc6d771a0",
+              "name": "Type",
+              "value": "={{$node[\"Edit Fields\"].json[\"Type\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "78411cab-f1d2-4340-bf5f-b4b8e447e96b",
+              "name": "Purpose",
+              "value": "={{$node[\"Edit Fields\"].json[\"Purpose\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "bbf5bf73-cd91-4537-9cf4-ef4cc279bcc0",
+              "name": "ai_output",
+              "value": "={{ $json.choices[0].message.content }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        192,
+        -192
+      ],
+      "id": "bd5118ee-8c21-4ae7-90c1-2b7c58f0557f",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "groqApi",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "JSON",
+        "body": "={{ {\n  model: \"llama-3.3-70b-versatile\",\n  messages: [\n    {\n      role: \"user\",\n      content: `You are an expert car comparison assistant.\\nUser Details:\\nName: ${$json.name}\\nBudget: ${$json.Budget}\\nType: ${$json.Type}\\nPurpose: ${$json.Purpose}\\n\\nPrevious AI Suggestions:\\n${$json.ai_output}\\n\\nNow:\\n1. Pick the BEST car\\n2. Give short comparison (top 3)\\n3. Explain WHY it's best\\n4. Keep it clean and structured`\n    }\n  ],\n  temperature: 0.7\n} }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -32,
+        112
+      ],
+      "id": "f432c9c4-a3a4-4cfa-b0d4-1a8a65ab0b8e",
+      "name": "Comparison Agent",
+      "credentials": {
+        "groqApi": {
+          "id": "K88czJwDkSJy0RCS",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "13b18a33-5ee6-4a1f-9491-f30b015f174e",
+              "name": "final_recommendation",
+              "value": "={{ $json.choices[0].message.content }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        192,
+        112
+      ],
+      "id": "5e23ece5-b28f-417a-b14e-8f7136723738",
+      "name": "Final_recommendation"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "groqApi",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "JSON",
+        "body": "={{ {\n  model: \"llama-3.1-8b-instant\",\n  messages: [\n    {\n      role: \"user\",\n      content: `You are a strict lead scoring AI for an Indian car dealership.\\nUser Name: ${$node[\"Edit Fields\"].json.name}\\nBudget: ${$node[\"Edit Fields\"].json.Budget}\\nPurpose: ${$node[\"Edit Fields\"].json.Purpose}\\n\\nClassify this user's intent as ONE of the following:\\n- HOT LEAD (High budget, clear family/daily purpose)\\n- WARM LEAD (Decent budget, standard purpose)\\n- COLD LEAD (Very low budget, unclear purpose)\\n\\nProvide a 1-sentence reason. Format EXACTLY like this:\\nScore: [Type]\\nReason: [Your reason]`\n    }\n  ],\n  temperature: 0.1\n} }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        416,
+        112
+      ],
+      "id": "4f80f82f-ab44-4908-94f3-374e0118195b",
+      "name": "Lead Scoring Agent",
+      "credentials": {
+        "groqApi": {
+          "id": "K88czJwDkSJy0RCS",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cd0e9b86-ff8c-417c-a8d8-0553b306dd66",
+              "name": "lead_score_analysis",
+              "value": "={{ $json.choices[0].message.content }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        640,
+        112
+      ],
+      "id": "ce1b87b5-07c9-4942-8255-e7301904c919",
+      "name": "lead_score_analysis"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "groqApi",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "JSON",
+        "body": "={{ {\n  model: \"llama-3.1-8b-instant\",\n  messages: [\n    {\n      role: \"user\",\n      content: `You are an expert Automotive Sales conversion agent. \\n      \\nCustomer Name: ${$node[\"Edit Fields\"].json.name}\\nPurpose: ${$node[\"Edit Fields\"].json.Purpose}\\nRecommended Car: ${$node[\"Final_recommendation\"].json.final_recommendation}\\n\\nDraft a highly personalized, warm WhatsApp message (max 3 lines) to invite the customer to the showroom for a test drive. Mention their specific purpose for buying the car. End with a friendly question asking when they are free to visit.`\n    }\n  ],\n  temperature: 0.7\n} }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        848,
+        112
+      ],
+      "id": "a5a41a21-b502-4115-b6f0-c488f7411bea",
+      "name": "The Enquiry-to-Test-Drive Conversion Agent",
+      "credentials": {
+        "groqApi": {
+          "id": "K88czJwDkSJy0RCS",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f762e11e-611a-4573-9d4d-fec98831cc00",
+              "name": "test_drive_message",
+              "value": "={{ $json.choices[0].message.content }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1072,
+        112
+      ],
+      "id": "468b85da-e61d-4b7e-8bbc-96fd0b23f879",
+      "name": "Test_drive_message"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "groqApi",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "JSON",
+        "body": "={{ {\n  model: \"llama-3.3-70b-versatile\",\n  messages: [\n    {\n      role: \"user\",\n      content: `You are a Sales Strategist for a car dealership. \\n      \\nCustomer Name: ${$node[\"Edit Fields\"].json.name}\\nBudget: ${$node[\"Edit Fields\"].json.Budget}\\nRecommended Car: ${$node[\"Final_recommendation\"].json.final_recommendation}\\n\\nPredict the #1 biggest objection this specific customer will have about buying this car (e.g., price, mileage, maintenance). Provide a 2-sentence script for the sales executive to confidently overcome this exact objection.`\n    }\n  ],\n  temperature: 0.7\n} }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1296,
+        112
+      ],
+      "id": "aa308893-e56c-4895-8ab7-65763758c025",
+      "name": "The Sales Objection Handler Agent",
+      "credentials": {
+        "groqApi": {
+          "id": "K88czJwDkSJy0RCS",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "866334b4-5baa-4694-8ef2-4325b3ef2c3b",
+              "name": "objection_cheat_sheet",
+              "value": "={{ $json.choices[0].message.content }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1520,
+        112
+      ],
+      "id": "cc42d998-26bb-41fe-9180-4a9d138d7b2b",
+      "name": "objection_cheat_sheet"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "groqApi",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "JSON",
+        "body": "={{ {\n  model: \"llama-3.1-8b-instant\",\n  messages: [\n    {\n      role: \"user\",\n      content: `You are a competitive sales intelligence expert at an Indian car dealership.\\n\\nCustomer: ${$node[\"Edit Fields\"].json.name}\\nBudget: ${$node[\"Edit Fields\"].json.Budget}\\nPurpose: ${$node[\"Edit Fields\"].json.Purpose}\\nRecommended Car: ${$node[\"Final_recommendation\"].json.final_recommendation}\\n\\nIn exactly 3 bullet points, explain why the recommended car beats its top 2 competitors in this budget range. Focus on what matters for the customer purpose. Keep each bullet short, factual, and sales-ready.`\n    }\n  ],\n  temperature: 0.5\n} }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1728,
+        112
+      ],
+      "id": "e0fc5204-dabd-4a3f-8bad-e43fa3ac2c4c",
+      "name": "Competitor Intelligence Agent",
+      "credentials": {
+        "groqApi": {
+          "id": "K88czJwDkSJy0RCS",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ci-set-001",
+              "name": "competitor_insight",
+              "value": "={{ $json.choices[0].message.content }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1952,
+        112
+      ],
+      "id": "22264666-7aa1-4233-bd3b-4b640c12a341",
+      "name": "competitor_insight"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "groqApi",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "JSON",
+        "body": "={{ {\n  model: \"llama-3.1-8b-instant\",\n  messages: [\n    {\n      role: \"user\",\n      content: `You are a friendly follow-up specialist at an Indian car dealership.\\n\\nCustomer: ${$node[\"Edit Fields\"].json.name}\\nRecommended Car: ${$node[\"Final_recommendation\"].json.final_recommendation}\\nPurpose: ${$node[\"Edit Fields\"].json.Purpose}\\n\\nWe sent a test drive invite 2 days ago and have not heard back. Write a SHORT 2-line WhatsApp follow-up message. Be warm and friendly, NOT pushy. Mention the car name. End by asking if they had any questions.`\n    }\n  ],\n  temperature: 0.7\n} }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2176,
+        112
+      ],
+      "id": "c3316697-62b3-48af-9bae-9ec75b01d6fe",
+      "name": "Follow-Up Message Agent",
+      "credentials": {
+        "groqApi": {
+          "id": "K88czJwDkSJy0RCS",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fm-set-001",
+              "name": "follow_up_message",
+              "value": "={{ $json.choices[0].message.content }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2400,
+        112
+      ],
+      "id": "70c39b57-032b-4682-814b-1b2a6dbbe45e",
+      "name": "follow_up_message"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "bd940874-268a-44bb-9bd2-bc0ae1f5daaf",
+              "name": "budget_num",
+              "value": "={{ parseInt($node[\"Edit Fields\"].json.Budget) * 100000 }}",
+              "type": "number"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        416,
+        -192
+      ],
+      "id": "243f054b-2228-4a14-be70-280744aafb39",
+      "name": "budget_num"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "79337bbe-7455-4652-89ba-dacad200e353",
+              "leftValue": "={{ $json.budget_num }}",
+              "rightValue": 1000000,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        640,
+        -192
+      ],
+      "id": "5770e8a3-f1ce-4be0-913a-f7e573d827c3",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"lead_type\": \"HIGH_BUDGET\"\n}",
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        848,
+        -288
+      ],
+      "id": "e8b28092-2ab6-4af6-b12f-2ab1a65c0ac9",
+      "name": "TRUE PATH (High budget)"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"lead_type\": \"LOW_BUDGET\"\n}",
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        848,
+        -96
+      ],
+      "id": "9ebdb46a-014f-47df-9cc4-b336d5330c69",
+      "name": "FALSE PATH (Low budget)"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1Zg7i0CMYtlmS1V0bpP5AxU07Hlr2GiklQdnDbvjlD9k/edit?usp=sharing",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Zg7i0CMYtlmS1V0bpP5AxU07Hlr2GiklQdnDbvjlD9k/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "name": "={{ $node[\"Edit Fields\"].json.name }}",
+            "Budget": "={{ $node[\"Edit Fields\"].json.Budget }}",
+            "Type": "={{ $node[\"Edit Fields\"].json.Type }}",
+            "Purpose": "={{ $node[\"Edit Fields\"].json.Purpose }}",
+            "email": "={{ $node[\"Edit Fields\"].json.email }}",
+            "phone": "={{ $node[\"Edit Fields\"].json.phone }}",
+            "ai_output": "={{ $('Edit Fields1').item.json.ai_output }}",
+            "final_recommendation": "={{ $('Final_recommendation').item.json.final_recommendation }}",
+            "lead_score_analysis": "={{ $('lead_score_analysis').item.json.lead_score_analysis }}",
+            "lead_type": "={{ $json.lead_type }}",
+            "budget_num": "={{ $json.budget_num }}",
+            "test_drive_message": "={{ $('Test_drive_message').item.json.test_drive_message }}",
+            "objection_cheat_sheet": "={{ $('objection_cheat_sheet').item.json.objection_cheat_sheet }}",
+            "competitor_insight": "={{ $('competitor_insight').item.json.competitor_insight }}",
+            "follow_up_message ": "={{ $('follow_up_message').item.json.follow_up_message }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Budget",
+              "displayName": "Budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Type",
+              "displayName": "Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Purpose",
+              "displayName": "Purpose",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ai_output",
+              "displayName": "ai_output",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "lead_type",
+              "displayName": "lead_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "budget_num",
+              "displayName": "budget_num",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "final_recommendation",
+              "displayName": "final_recommendation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "lead_score_analysis",
+              "displayName": "lead_score_analysis",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "test_drive_message",
+              "displayName": "test_drive_message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "objection_cheat_sheet",
+              "displayName": "objection_cheat_sheet",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "competitor_insight",
+              "displayName": "competitor_insight",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "follow_up_message ",
+              "displayName": "follow_up_message ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1072,
+        -192
+      ],
+      "id": "e1998e70-1982-46df-97c3-3077dbb3af24",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "UiUbjU7VVQb1CtNg",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v19.0/1106615305874500/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ {\n  \"messaging_product\": \"whatsapp\",\n  \"to\": $node[\"Edit Fields\"].json.phone,\n  \"type\": \"text\",\n  \"text\": {\n    \"body\": $('Test_drive_message').item.json.test_drive_message\n  }\n} }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1296,
+        -192
+      ],
+      "id": "3e4d2c56-985d-4259-ba18-e3c74de232a9",
+      "name": "HTTP Request",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "25XTTLtMIV5BKebW",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $node[\"Edit Fields\"].json.email }}",
+        "subject": "=Test Drive Invitation: Your New {{ $node[\"Edit Fields\"].json.Type }}",
+        "message": "=<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;\">\n  <div style=\"background: linear-gradient(135deg, #1a1a2e, #16213e); padding: 30px; border-radius: 12px; text-align: center;\">\n    <h1 style=\"color: #e94560; margin: 0;\">🚗 Your Perfect Car Awaits</h1>\n    <p style=\"color: #a8b2d8; margin-top: 8px;\">Personalised for {{ $node[\"Edit Fields\"].json.name }}</p>\n  </div>\n\n  <div style=\"background: white; padding: 24px; border-radius: 12px; margin-top: 20px; border-left: 4px solid #e94560;\">\n    <h2 style=\"color: #1a1a2e; margin-top: 0;\">🏆 Our Top Recommendation</h2>\n    <p style=\"color: #444; line-height: 1.7;\">{{ $('Final_recommendation').item.json.final_recommendation }}</p>\n  </div>\n\n  <div style=\"background: white; padding: 24px; border-radius: 12px; margin-top: 16px; border-left: 4px solid #0f3460;\">\n    <h2 style=\"color: #1a1a2e; margin-top: 0;\">⚡ Why It Beats the Competition</h2>\n    <p style=\"color: #444; line-height: 1.7;\">{{ $('competitor_insight').item.json.competitor_insight }}</p>\n  </div>\n\n  <div style=\"background: #e94560; padding: 20px; border-radius: 12px; margin-top: 16px; text-align: center;\">\n    <h3 style=\"color: white; margin: 0 0 8px 0;\">🎯 Book Your Test Drive Today</h3>\n    <p style=\"color: #ffd1d8; margin: 0; font-size: 15px;\">{{ $('Test_drive_message').item.json.test_drive_message }}</p>\n  </div>\n\n  <p style=\"text-align: center; color: #999; font-size: 12px; margin-top: 20px;\">This email was sent automatically by our AI Sales Agent | Powered by n8n</p>\n</div>",
+        "options": {
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {}
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1936,
+        -192
+      ],
+      "id": "82297222-db2d-44f2-bd75-1c3558d6d223",
+      "name": "Send a message",
+      "webhookId": "68125dad-9ea2-407a-9951-d9d3bd2030ea",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "LJkqZJ0d0MsiFWUW",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 2,
+        "unit": "minutes"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2144,
+        -192
+      ],
+      "id": "1c88af97-1311-4f51-92de-fda8bae67997",
+      "name": "Wait 2 Min (change to days for production)",
+      "webhookId": "wait-webhook-001"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v19.0/1106615305874500/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ {\n  \"messaging_product\": \"whatsapp\",\n  \"to\": $node[\"Edit Fields\"].json.phone,\n  \"type\": \"text\",\n  \"text\": {\n    \"body\": $('follow_up_message').item.json.follow_up_message\n  }\n} }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2368,
+        -192
+      ],
+      "id": "02982632-c2f1-431f-8e1a-839de5a7628c",
+      "name": "Follow-Up WhatsApp",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "25XTTLtMIV5BKebW",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $node[\"Edit Fields\"].json.email }}",
+        "subject": "=Still Thinking? Your {{ $node[\"Edit Fields\"].json.Type }} is Waiting 🚗",
+        "message": "=<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;\">\n  <div style=\"background: linear-gradient(135deg, #0f3460, #16213e); padding: 30px; border-radius: 12px; text-align: center;\">\n    <h1 style=\"color: #e94560; margin: 0;\">👋 Still Interested, {{ $node[\"Edit Fields\"].json.name }}?</h1>\n  </div>\n\n  <div style=\"background: white; padding: 24px; border-radius: 12px; margin-top: 20px;\">\n    <p style=\"color: #444; font-size: 16px; line-height: 1.7;\">{{ $('follow_up_message').item.json.follow_up_message }}</p>\n    <hr style=\"border: none; border-top: 1px solid #eee; margin: 20px 0;\">\n    <p style=\"color: #666; font-size: 14px;\">As a reminder, here was our recommendation for you:</p>\n    <p style=\"color: #1a1a2e; font-size: 14px; line-height: 1.6;\">{{ $('Final_recommendation').item.json.final_recommendation }}</p>\n  </div>\n\n  <p style=\"text-align: center; color: #999; font-size: 12px; margin-top: 20px;\">Powered by AI Sales Agent | n8n</p>\n</div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2592,
+        -192
+      ],
+      "id": "3bce5999-7dfc-45a6-a01e-01126457b2d8",
+      "name": "Follow-Up Gmail",
+      "webhookId": "6600106c-ff05-4c2a-819a-0495e5e9a50e",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "LJkqZJ0d0MsiFWUW",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Get the raw AI recommendation text\nlet rawRecommendation = $('Final_recommendation').item.json.final_recommendation;\n\n// 2. Clean the formatting:\n// Convert Markdown bold (**text**) to HTML bold (<strong>text</strong>)\n// Convert newlines (\\n) to HTML line breaks (<br>)\nlet cleanedRecommendation = rawRecommendation\n  .replace(/\\*\\*(.*?)\\*\\*/g, '<strong>$1</strong>')\n  .replace(/\\n/g, '<br>');\n\n// 3. Build the HTML template\nconst html = `\n<html>\n<body style=\"font-family: Arial, sans-serif; padding: 40px; color: #333; line-height: 1.6;\">\n  <div style=\"max-width: 600px; margin: 0 auto; border: 1px solid #eaeaea; padding: 30px; border-radius: 10px;\">\n    <h1 style=\"color: #e94560; margin-top: 0;\">Your Personalized Car Brochure</h1>\n    <h2 style=\"color: #555;\">Prepared for: ${$('Edit Fields').item.json.name}</h2>\n    \n    <div style=\"background: #f9f9f9; padding: 15px; border-radius: 8px; margin: 20px 0;\">\n      <p style=\"margin: 0;\"><strong>Requirement:</strong> ${$('Edit Fields').item.json.Type} for ${$('Edit Fields').item.json.Purpose}</p>\n      <p style=\"margin: 5px 0 0 0;\"><strong>Budget:</strong> ${$('Edit Fields').item.json.Budget}</p>\n    </div>\n    \n    <hr style=\"border: none; border-top: 1px solid #eee; margin: 20px 0;\">\n    \n    <h3 style=\"color: #0f3460;\">Our Top Recommendation & Comparison:</h3>\n    <p style=\"font-size: 15px;\">${cleanedRecommendation}</p>\n  </div>\n</body>\n</html>\n`;\n\n// 4. Convert to Binary for the email attachment\nconst buffer = Buffer.from(html);\n\nreturn {\n  json: $input.item.json,\n  binary: {\n    attachment: {\n      data: buffer.toString('base64'),\n      mimeType: 'text/html',\n      fileName: 'Personalized_Brochure.html'\n    }\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1504,
+        -192
+      ],
+      "id": "8ab6c681-566d-47ad-a251-5f83089d991f",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "authentication": "apiKey",
+        "outputFormat": "pdf",
+        "inputBinaryPropertyName": "attachment"
+      },
+      "type": "@cloudconvert/n8n-nodes-cloudconvert.cloudConvert",
+      "typeVersion": 1,
+      "position": [
+        1712,
+        -192
+      ],
+      "id": "299a61a9-666f-4d19-8091-ee6304bc96b0",
+      "name": "Convert a file",
+      "credentials": {
+        "cloudConvertApi": {
+          "id": "rlzIufGnAL31TTJz",
+          "name": "CloudConvert account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Lead Intake Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Car_Recommender",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Car_Recommender": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Comparison Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Comparison Agent": {
+      "main": [
+        [
+          {
+            "node": "Final_recommendation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Final_recommendation": {
+      "main": [
+        [
+          {
+            "node": "Lead Scoring Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lead Scoring Agent": {
+      "main": [
+        [
+          {
+            "node": "lead_score_analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "lead_score_analysis": {
+      "main": [
+        [
+          {
+            "node": "The Enquiry-to-Test-Drive Conversion Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "The Enquiry-to-Test-Drive Conversion Agent": {
+      "main": [
+        [
+          {
+            "node": "Test_drive_message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Test_drive_message": {
+      "main": [
+        [
+          {
+            "node": "The Sales Objection Handler Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "The Sales Objection Handler Agent": {
+      "main": [
+        [
+          {
+            "node": "objection_cheat_sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "objection_cheat_sheet": {
+      "main": [
+        [
+          {
+            "node": "Competitor Intelligence Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Competitor Intelligence Agent": {
+      "main": [
+        [
+          {
+            "node": "competitor_insight",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "competitor_insight": {
+      "main": [
+        [
+          {
+            "node": "Follow-Up Message Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Follow-Up Message Agent": {
+      "main": [
+        [
+          {
+            "node": "follow_up_message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "follow_up_message": {
+      "main": [
+        [
+          {
+            "node": "budget_num",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "budget_num": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "TRUE PATH (High budget)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "FALSE PATH (Low budget)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TRUE PATH (High budget)": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FALSE PATH (Low budget)": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Wait 2 Min (change to days for production)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 2 Min (change to days for production)": {
+      "main": [
+        [
+          {
+            "node": "Follow-Up WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Follow-Up WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Follow-Up Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Convert a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert a file": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "2812d135-df44-46d7-8ea1-c2bb59e04ca4",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "658bfa3b3f72411541bb161011b09d0a0b3294ba7fc1e6eabf57b83d67f2e50a"
+  },
+  "id": "AnZ1XICV8XLZOqXd",
+  "tags": []
+}
