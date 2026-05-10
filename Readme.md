@@ -1,21 +1,18 @@
-````md
 # AI Automotive Recommendation and Lead Automation System
 
-An advanced multi-agent AI-powered automotive sales automation platform built using n8n, Groq LLMs, WhatsApp API, Gmail API, Google Sheets, and a custom frontend dashboard.
+An advanced, multi-agent AI platform that automates the full automotive dealership lead pipeline using **n8n**, **Groq LLMs**, **WhatsApp Cloud API**, **Gmail API**, **Google Sheets**, and a custom frontend dashboard.
 
-This system automates the complete automotive dealership lead pipeline including:
-- AI vehicle recommendations
-- Lead qualification and scoring
-- Competitor comparison
-- Sales objection handling
-- WhatsApp and Gmail communication
-- Personalized brochure generation
-- Follow-up automation
-- Real-time dashboard analytics
+## Highlights
+
+- AI vehicle recommendations tailored to budget, segment, and intent
+- Lead qualification, scoring, and automated follow-up
+- Competitor comparison and objection handling
+- WhatsApp and Gmail outreach automation
+- Real-time CRM storage and analytics dashboard
 
 ---
 
-# Table of Contents
+## Table of Contents
 
 - [Project Overview](#project-overview)
 - [System Architecture](#system-architecture)
@@ -26,7 +23,7 @@ This system automates the complete automotive dealership lead pipeline including
 - [Frontend Dashboard](#frontend-dashboard)
 - [Project Structure](#project-structure)
 - [Setup Instructions](#setup-instructions)
-- [Running the Frontend Locally](#Running-the-Frontend-Locally)
+- [Running the Frontend Locally](#running-the-frontend-locally)
 - [Configuration](#configuration)
 - [Screenshots](#screenshots)
 - [Security Notice](#security-notice)
@@ -36,17 +33,17 @@ This system automates the complete automotive dealership lead pipeline including
 
 ---
 
-# Project Overview
+## Project Overview
 
-This project was designed to simulate a real-world AI-driven automotive dealership automation system.
+This project simulates a real-world AI-driven automotive dealership automation system. The workflow accepts customer requirements such as:
 
-The workflow accepts customer requirements such as:
 - vehicle type
 - budget
 - purchase purpose
 - contact details
 
-The system then processes the customer using multiple AI agents to:
+The system processes each customer using multiple AI agents to:
+
 - recommend vehicles
 - compare alternatives
 - classify lead quality
@@ -54,11 +51,11 @@ The system then processes the customer using multiple AI agents to:
 - automate follow-ups
 - store structured CRM data
 
-The complete orchestration is handled using n8n.
+All orchestration is handled in **n8n**.
 
 ---
 
-# System Architecture
+## System Architecture
 
 ```text
 Frontend UI
@@ -82,98 +79,98 @@ WhatsApp + Gmail Automation
 Google Sheets CRM
     ↓
 Live Dashboard Analytics
-````
+```
 
 ---
 
-# AI Agents
+## AI Agents
 
-## 1. Car Recommendation Agent
+### 1. Car Recommendation Agent
 
 Analyzes:
 
-* budget
-* car type
-* customer purpose
+- budget
+- car type
+- customer purpose
 
 Generates intelligent Indian automotive recommendations.
 
 ---
 
-## 2. Comparison Agent
+### 2. Comparison Agent
 
 Compares top vehicle options and explains:
 
-* strengths
-* weaknesses
-* best overall choice
+- strengths
+- weaknesses
+- best overall choice
 
 ---
 
-## 3. Lead Scoring Agent
+### 3. Lead Scoring Agent
 
 Classifies customers into:
 
-* HOT LEAD
-* WARM LEAD
-* COLD LEAD
+- **HOT LEAD**
+- **WARM LEAD**
+- **COLD LEAD**
 
-based on:
+Based on:
 
-* budget
-* purchase intent
-* usage pattern
+- budget
+- purchase intent
+- usage pattern
 
 ---
 
-## 4. Test Drive Conversion Agent
+### 4. Test Drive Conversion Agent
 
 Creates personalized WhatsApp sales messages inviting customers to book a test drive.
 
 ---
 
-## 5. Sales Objection Handler Agent
+### 5. Sales Objection Handler Agent
 
 Predicts likely customer objections and generates handling strategies for sales representatives.
 
 ---
 
-## 6. Competitor Intelligence Agent
+### 6. Competitor Intelligence Agent
 
 Explains why the recommended vehicle is superior to competing models in the same segment.
 
 ---
 
-## 7. Follow-Up Message Agent
+### 7. Follow-Up Message Agent
 
 Automatically generates polite follow-up communication for inactive leads.
 
 ---
 
-# Features
+## Features
 
-* Multi-agent AI workflow orchestration
-* AI-powered automotive recommendations
-* Automated lead qualification
-* Real-time CRM data storage
-* WhatsApp automation
-* Gmail automation
-* Personalized brochure generation
-* Follow-up automation
-* Dashboard analytics
-* Google Sheets integration
-* Customer scoring system
-* Sales intelligence generation
-* Admin panel with system toggles
-* JWT-based login flow (frontend)
-* Unified design system across UI
-* Live Google Sheets auto-refresh
-* Robust CSV parser for multi-line AI output
-* CSV export from dashboard
+- Multi-agent AI workflow orchestration
+- AI-powered automotive recommendations
+- Automated lead qualification
+- Real-time CRM data storage
+- WhatsApp automation
+- Gmail automation
+- Personalized brochure generation
+- Follow-up automation
+- Dashboard analytics
+- Google Sheets integration
+- Customer scoring system
+- Sales intelligence generation
+- Admin panel with system toggles
+- JWT-based login flow (frontend)
+- Unified design system across UI
+- Live Google Sheets auto-refresh
+- Robust CSV parser for multi-line AI output
+- CSV export from dashboard
 
 ---
 
-# Technology Stack
+## Technology Stack
 
 | Technology          | Purpose                |
 | ------------------- | ---------------------- |
@@ -189,7 +186,7 @@ Automatically generates polite follow-up communication for inactive leads.
 
 ---
 
-# Workflow Pipeline
+## Workflow Pipeline
 
 ```text
 Lead Intake
@@ -217,29 +214,29 @@ Dashboard Visualization
 
 ---
 
-# Frontend Dashboard
+## Frontend Dashboard
 
 The project includes:
 
-* customer intake form
-* real-time analytics dashboard
-* lead distribution metrics
-* automotive demand visualization
-* admin settings panel
-* login screen with JWT-based flow
+- customer intake form
+- real-time analytics dashboard
+- lead distribution metrics
+- automotive demand visualization
+- admin settings panel
+- login screen with JWT-based flow
 
 Dashboard capabilities:
 
-* total leads tracking
-* hot/warm/cold lead distribution
-* vehicle category analytics
-* live Google Sheets updates (auto-refresh)
-* CSV export
-* lead search and filtering
+- total leads tracking
+- hot/warm/cold lead distribution
+- vehicle category analytics
+- live Google Sheets updates (auto-refresh)
+- CSV export
+- lead search and filtering
 
 ---
 
-# Project Structure
+## Project Structure
 
 ```text
 AI-Automotive-Recommendation-Agent/
@@ -270,9 +267,9 @@ AI-Automotive-Recommendation-Agent/
 
 ---
 
-# Setup Instructions
+## Setup Instructions
 
-## 1. Clone Repository
+### 1. Clone Repository
 
 ```bash
 git clone https://github.com/your-username/AI-Automotive-Recommendation-Agent.git
@@ -280,10 +277,10 @@ git clone https://github.com/your-username/AI-Automotive-Recommendation-Agent.gi
 
 ---
 
-## 2. Import Workflow into n8n
+### 2. Import Workflow into n8n
 
-1. Open n8n
-2. Click "Import Workflow"
+1. Open n8n.
+2. Click **Import Workflow**.
 3. Import:
 
    ```text
@@ -292,20 +289,19 @@ git clone https://github.com/your-username/AI-Automotive-Recommendation-Agent.gi
 
 ---
 
-
-## 3. Configure Credentials
+### 3. Configure Credentials
 
 Configure the following credentials in n8n:
 
-* Groq API
-* Gmail OAuth
-* Google Sheets OAuth
-* WhatsApp Cloud API
-* CloudConvert API
+- Groq API
+- Gmail OAuth
+- Google Sheets OAuth
+- WhatsApp Cloud API
+- CloudConvert API
 
 ---
 
-## 4. Configure Frontend
+### 4. Configure Frontend
 
 Inside:
 
@@ -316,7 +312,7 @@ Frontend/index.html
 Update:
 
 ```javascript
-WEBHOOK_URL = "YOUR_N8N_WEBHOOK_URL"
+WEBHOOK_URL = "YOUR_N8N_WEBHOOK_URL";
 ```
 
 Inside:
@@ -328,12 +324,12 @@ Frontend/dashboard.html
 Update:
 
 ```javascript
-SHEET_SOURCE_URL = "YOUR_GOOGLE_SHEET_LINK"
+SHEET_SOURCE_URL = "YOUR_GOOGLE_SHEET_LINK";
 ```
 
 ---
 
-## 5. Optional: Run Backend Server
+### 5. Optional: Run Backend Server
 
 The backend is optional for UI-only usage. If you want to use server endpoints and WebSocket utilities:
 
@@ -343,124 +339,120 @@ node server.js
 
 ---
 
-## 5. Activate Workflow
+### 6. Activate Workflow
 
 Activate the workflow in n8n and start submitting leads through the frontend interface.
 
 ---
+
 ## Running the Frontend Locally
 
 The frontend dashboard and intake form are designed to run using the VS Code Live Server extension.
 
 ### Steps
 
-1. Open the project folder in Visual Studio Code
-2. Install the "Live Server" extension
+1. Open the project folder in Visual Studio Code.
+2. Install the **Live Server** extension.
 3. Open:
-   - `frontend/index.html`
-   - or `frontend/dashboard.html`
-4. Click the **"Go Live"** button located at the bottom-right corner of VS Code
-5. The frontend will automatically open in the browser
+   - `Frontend/index.html`
+   - or `Frontend/dashboard.html`
+4. Click the **Go Live** button located at the bottom-right corner of VS Code.
+5. The frontend will automatically open in the browser.
 
 ### Important
 
 Before running:
-- Ensure the n8n workflow is active
-- Update the webhook URL in `index.html`
-- Update the Google Sheets CSV URL in `dashboard.html`
+
+- Ensure the n8n workflow is active.
+- Update the webhook URL in `index.html`.
+- Update the Google Sheets CSV URL in `dashboard.html`.
 
 The frontend communicates directly with the n8n webhook and live Google Sheets dashboard feed.
 
 ---
 
-# Configuration
+## Configuration
 
-## Required APIs
+### Required APIs
 
-* Groq API
-* WhatsApp Cloud API
-* Gmail API
-* Google Sheets API
-* CloudConvert API
-
----
-
-## Environment Requirements
-
-* n8n instance
-* Internet connectivity
-* API credentials
-* Google Sheets access
+- Groq API
+- WhatsApp Cloud API
+- Gmail API
+- Google Sheets API
+- CloudConvert API
 
 ---
 
-# Screenshots
+### Environment Requirements
+
+- n8n instance
+- Internet connectivity
+- API credentials
+- Google Sheets access
+
+---
+
+## Screenshots
 
 Add screenshots inside:
 
 ```text
-/screenshots
+/Screenshots
 ```
 
 Recommended screenshots:
 
-* workflow architecture
-* frontend UI
-* dashboard analytics
-* WhatsApp automation
-* Gmail automation
-* Google Sheets CRM
+- workflow architecture
+- frontend UI
+- dashboard analytics
+- WhatsApp automation
+- Gmail automation
+- Google Sheets CRM
 
 ---
 
-# Security Notice
+## Security Notice
 
 Sensitive credentials and tokens were removed before publishing this repository.
 
 Before running the project:
 
-* configure your own API credentials
-* update webhook URLs
-* configure OAuth integrations
+- configure your own API credentials
+- update webhook URLs
+- configure OAuth integrations
 
 Never expose:
 
-* API keys
-* OAuth tokens
-* private webhook URLs
-* WhatsApp access tokens
+- API keys
+- OAuth tokens
+- private webhook URLs
+- WhatsApp access tokens
 
 ---
 
-# Future Improvements
+## Future Improvements
 
 Potential future enhancements:
 
-* voice assistant integration
-* dealership inventory APIs
-* payment and EMI estimation
-* customer sentiment analysis
-* fine-tuned automotive models
-* mobile application support
-* advanced CRM backend
-* predictive customer analytics
+- voice assistant integration
+- dealership inventory APIs
+- payment and EMI estimation
+- customer sentiment analysis
+- fine-tuned automotive models
+- mobile application support
+- advanced CRM backend
+- predictive customer analytics
 
 ---
 
-# Resume Description
+## Resume Description
 
-Built an AI-powered multi-agent automotive sales automation platform using n8n, Groq LLMs, WhatsApp API, Gmail API, Google Sheets, and real-time dashboards to automate vehicle recommendations, customer engagement, lead scoring, and dealership workflows.
+Built an AI-powered multi-agent automotive sales automation platform using n8n, Groq LLMs, WhatsApp API, Gmail API, Google Sheets, and real-time dashboards to automate vehicle recommendations, customer scoring, sales messaging, and CRM tracking.
 
 ---
 
-# Author
+## Author
 
-Mohammed Zaidaan Shiraz
-
-Engineering Student
+Mohammed Zaidaan Shiraz  
+Engineering Student  
 AI and Automation Enthusiast
-
----
-
-```
-```
