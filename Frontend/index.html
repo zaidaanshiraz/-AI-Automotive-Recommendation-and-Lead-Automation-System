@@ -1,161 +1,303 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AutoLeads AI - Form</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>
-  :root { --red: #e94560; --dark: #0a0a14; --sidebar: #161625; --card: #12121f; --border: #2a2a35; --text: #c8cfe8; --muted: #64748b; }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'DM Sans', sans-serif; background: var(--dark); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
-  
-  /* Unified Sidebar */
-  .sidebar { width: 260px; background: var(--sidebar); border-right: 1px solid var(--border); padding: 30px 20px; display: flex; flex-direction: column; }
-  .brand { font-family: 'Bebas Neue', cursive; font-size: 32px; color: var(--red); text-align: center; margin-bottom: 40px; letter-spacing: 2px; }
-  .nav-links { display: flex; flex-direction: column; gap: 10px; }
-  .nav-links a { text-decoration: none; color: var(--muted); padding: 14px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; transition: 0.2s; display: flex; align-items: center; gap: 10px; }
-  .nav-links a:hover { background: rgba(255,255,255,0.05); color: #fff; }
-  .nav-links a.active { background: var(--red); color: #fff; }
-
-  /* Main Content Area */
-  .main-content { flex: 1; overflow-y: auto; display: flex; align-items: center; justify-content: center; padding: 30px; }
-  
-  /* Form Card */
-  .wrapper { width: 100%; max-width: 500px; }
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 36px 32px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-  .card-title { font-size: 22px; font-weight: 600; color: #fff; margin-bottom: 4px; }
-  .card-sub { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
-  
-  .field { margin-bottom: 20px; }
-  label { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; letter-spacing: 1px; }
-  input, select { width: 100%; background: #0f0f19; border: 1px solid var(--border); border-radius: 10px; padding: 13px 16px; color: #fff; outline: none; font-family: 'DM Sans', sans-serif; }
-  input:focus, select:focus { border-color: var(--red); }
-  
-  .btn { width: 100%; background: var(--red); border: none; border-radius: 12px; padding: 16px; font-weight: 600; color: #fff; cursor: pointer; margin-top: 8px; font-size: 15px; transition: 0.2s; }
-  .btn:hover { background: #d63d56; transform: translateY(-2px); }
-  .status { margin-top: 16px; padding: 14px; border-radius: 10px; display: none; font-size: 14px; text-align: center; }
-  .status.success { background: rgba(34,197,94,0.1); color: #4ade80; display: block; border: 1px solid rgba(34,197,94,0.3); }
-  .status.loading { background: rgba(255,255,255,0.05); color: var(--text); display: block; border: 1px solid var(--border); }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main Portal | AutoLeads</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; color: var(--text); font-weight: 500; }
+        .form-group input, .form-group select {
+            width: 100%; padding: 12px; border-radius: 8px;
+            border: 1px solid var(--border); background: var(--dark);
+            color: var(--text); font-family: var(--font-body);
+        }
+        .submit-btn {
+            width: 100%; padding: 15px; background: var(--red);
+            color: white; border: none; border-radius: 8px;
+            font-size: 16px; font-weight: 700; cursor: pointer; transition: background 0.3s;
+        }
+        .submit-btn:hover { background: var(--red-hover); }
+        .restart-btn {
+            margin-top: 20px; background: var(--red); border: none;
+            color: white; padding: 14px; border-radius: 8px;
+            width: 100%; cursor: pointer; font-size: 15px;
+            font-weight: 700; font-family: var(--font-body); transition: background 0.3s;
+        }
+        .restart-btn:hover { background: var(--red-hover); }
+        .result-scroll {
+            background: var(--dark); padding: 20px; border-radius: 8px;
+            border: 1px solid var(--border); max-height: 65vh;
+            overflow-y: auto; scroll-behavior: smooth;
+        }
+        .result-scroll::-webkit-scrollbar { width: 6px; }
+        .result-scroll::-webkit-scrollbar-track { background: var(--dark); border-radius: 3px; }
+        .result-scroll::-webkit-scrollbar-thumb { background: var(--red); border-radius: 3px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
 </head>
 <body>
 
-<!-- Sidebar -->
-<aside class="sidebar">
-  <div class="brand">AutoLeads AI</div>
-  <nav class="nav-links">
-    <a href="index.html" class="active">📝 New Lead Intake</a>
-    <a href="dashboard.html">📊 Live Dashboard</a>
-  </nav>
-</aside>
-
-<!-- Main Form -->
-<main class="main-content">
-  <div class="wrapper">
-    <div class="card">
-      <div class="card-title">Customer Intake</div>
-      <div class="card-sub">Generate AI recommendations instantly.</div>
-
-      <div class="field">
-        <label>Full Name</label>
-        <input type="text" id="name" value="Mohammed Zaidaan Shiraz" required>
-      </div>
-      <div class="field">
-        <label>Phone (WhatsApp)</label>
-        <input type="text" id="phone" placeholder="91XXXXXXXXXX" required>
-      </div>
-      <div class="field">
-        <label>Email Address</label>
-        <input type="email" id="email" placeholder="you@example.com" required>
-      </div>
-      <div class="field" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-        <div>
-          <label>Car Type</label>
-          <select id="type">
-            <option value="SUV">SUV</option>
-            <option value="Sedan">Sedan</option>
-            <option value="Hatchback">Hatchback</option>
-          </select>
-        </div>
-        <div>
-          <label>Budget (Lakhs)</label>
-          <input type="number" id="budgetRange" value="15" min="3" max="100">
-        </div>
-      </div>
-      <div class="field">
-        <label>Primary Purpose</label>
-        <select id="purpose">
-          <option value="Family + City">Family + City</option>
-          <option value="Daily Commute">Daily Commute</option>
-          <option value="Highway + Road Trips">Highway + Road Trips</option>
-        </select>
-      </div>
-
-      <button class="btn" id="submitBtn" onclick="submitLead()">Run AI Agent</button>
-      <div class="status" id="statusBox"></div>
-    </div>
+<nav class="sidebar" style="width: var(--sidebar-width); background: var(--sidebar-bg); border-right: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; min-height: 100vh;">
+  <div class="brand" style="font-family: var(--font-heading); font-size: 28px; color: var(--red); margin-bottom: 40px;">
+    AUTO<span style="color: var(--text);">LEADS</span>
   </div>
+  <ul style="list-style: none; display: flex; flex-direction: column; gap: 15px; padding: 0;">
+    <li><a href="dashboard.html" style="color: var(--muted); text-decoration: none; font-weight: 500; display: flex; align-items: center; gap: 10px;">📊 Dashboard</a></li>
+    <li><a href="admin.html" style="color: var(--muted); text-decoration: none; font-weight: 500; display: flex; align-items: center; gap: 10px;">⚙️ Settings</a></li>
+    <li><a href="index.html" style="color: var(--text); text-decoration: none; font-weight: 500; display: flex; align-items: center; gap: 10px;">🌐 Main Portal</a></li>
+  </ul>
+  <div style="margin-top: auto;">
+    <button onclick="document.body.classList.toggle('light-mode')" style="background: transparent; border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 6px; cursor: pointer; width: 100%; font-family: var(--font-body);">
+      🌓 Toggle Theme
+    </button>
+  </div>
+</nav>
+
+<main style="flex: 1; padding: 30px; overflow-y: auto; display: flex; justify-content: center;">
+    <div class="portal-container" style="max-width: 600px; width: 100%; margin-top: 40px;">
+        <div style="text-align: center; margin-bottom: 40px;">
+            <div style="font-family: var(--font-heading); font-size: 42px; color: var(--red);">
+                AUTO<span style="color: var(--text);">LEADS</span>
+            </div>
+            <p style="color: var(--muted);">AI-Powered Vehicle Recommendations</p>
+        </div>
+
+        <div class="card" id="lead-form-card">
+            <form id="leadForm">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" required placeholder="e.g. Mohammed Zaidaan Shiraz">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" required placeholder="Where should we send the brochure?">
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" required placeholder="For WhatsApp updates">
+                </div>
+                <div class="form-group">
+                    <label for="budget">Budget (Rs.)</label>
+                    <select id="budget" required>
+                        <option value="">Select your budget range...</option>
+                        <option value="500000">Under Rs.5 Lakhs</option>
+                        <option value="700000">Rs.5 - 7 Lakhs</option>
+                        <option value="1000000">Rs.7 - 10 Lakhs</option>
+                        <option value="1500000">Rs.10 - 15 Lakhs</option>
+                        <option value="2000000">Rs.15 - 20 Lakhs</option>
+                        <option value="3000000">Rs.20 - 30 Lakhs</option>
+                        <option value="5000000">Rs.30 - 50 Lakhs</option>
+                        <option value="7500000">Rs.50 Lakhs - 75 Lakhs</option>
+                        <option value="10000000">Above Rs.1 Crore</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="type">Preferred Vehicle Type</label>
+                    <select id="type" required>
+                        <option value="">Select a segment...</option>
+                        <option value="Sedan">Sedan (e.g., Honda City)</option>
+                        <option value="SUV">SUV</option>
+                        <option value="Hatchback">Hatchback</option>
+                        <option value="EV">Electric Vehicle</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="purpose">Primary Purpose</label>
+                    <input type="text" id="purpose" required placeholder="e.g. Daily commute, family trips">
+                </div>
+                <button type="submit" class="submit-btn">Get AI Recommendation</button>
+            </form>
+        </div>
+
+        <div id="ai-result-container" style="display: none; margin-top: 30px;" class="card">
+            <div id="ai-loading" style="text-align: center; padding: 20px;">
+                <h3 style="color: var(--red); font-family: var(--font-heading);">AI Agent is analyzing your profile...</h3>
+                <p style="color: var(--muted); font-family: var(--font-body);">Generating personalized vehicle recommendation and dispatching brochure to your email.</p>
+                <div style="margin: 20px auto; border: 4px solid var(--border); border-top: 4px solid var(--red); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite;"></div>
+            </div>
+
+            <div id="ai-success" style="display: none;">
+                <h2 style="color: var(--green); margin-bottom: 15px; font-family: var(--font-heading);">Your AI Recommendation is Ready</h2>
+                <div class="result-scroll">
+                    <div id="ai-recommendation-text" style="font-size: 15px; line-height: 1.8; color: var(--text); font-family: var(--font-body);"></div>
+                </div>
+                <p style="color: var(--muted); margin-top: 15px; font-size: 14px; text-align: center; font-family: var(--font-body);">
+                    We have also sent the detailed brochure and specs to your inbox.
+                </p>
+                <button onclick="resetForm()" class="restart-btn">Get Another Recommendation</button>
+            </div>
+        </div>
+    </div>
 </main>
+
 <script>
-  // ⚠️ YOUR WEBHOOK URL HERE
-  const WEBHOOK_URL = "https://zaidaanisawesome.app.n8n.cloud/webhook-test/automotive-lead";
+    const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT_-f-MJz3AnvBaKq3ZM11zHHM1IR1c7X0a4XnSUL-vjG59AtMNgNzpJjxBV6m2RTJbj4Jqd3ibNLvd/pub?gid=0&single=true&output=csv';
+    const N8N_WEBHOOK_URL = 'https://zaidaanisawesome.app.n8n.cloud/webhook-test/automotive-lead';
 
-  async function submitLead() {
-    const payload = {
-      name: document.getElementById('name').value.trim(),
-      phone: document.getElementById('phone').value.trim(),
-      email: document.getElementById('email').value.trim(),
-      Type: document.getElementById('type').value,
-      Purpose: document.getElementById('purpose').value,
-      Budget: document.getElementById('budgetRange').value + " lakh"
-    };
-
-    const statusBox = document.getElementById('statusBox');
-    statusBox.className = 'status loading';
-    
-    // The "AI Thinking" Sequence Messages
-    const loadingSteps = [
-      "🧠 Analyzing car preferences...",
-      "🚗 Scanning top models in budget...",
-      "⚖️ Running competitor comparison...",
-      "📄 Generating personalized PDF brochure...",
-      "📡 Dispatching to WhatsApp & Email..."
-    ];
-    
-    let currentStep = 0;
-    statusBox.textContent = loadingSteps[currentStep];
-
-    // Cycle through the messages every 2.5 seconds
-    const loadingInterval = setInterval(() => {
-      currentStep++;
-      if (currentStep < loadingSteps.length) {
-        statusBox.textContent = loadingSteps[currentStep];
-      }
-    }, 2500);
-
-    try {
-      // Send the data to n8n
-      await fetch(WEBHOOK_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      
-      // When finished, stop the timer and show Success
-      clearInterval(loadingInterval);
-      statusBox.className = 'status success';
-      statusBox.innerHTML = '<strong>✅ Complete!</strong> Check WhatsApp & Dashboard.';
-      
-    } catch (err) {
-      // If it fails, stop the timer and show Error
-      clearInterval(loadingInterval);
-      statusBox.className = 'status loading';
-      statusBox.style.color = '#ef4444';
-      statusBox.style.borderColor = '#ef4444';
-      statusBox.textContent = '❌ Connection Error. Ensure your Webhook is active.';
+    function resetForm() {
+        document.getElementById('leadForm').reset();
+        document.getElementById('lead-form-card').style.display = 'block';
+        document.getElementById('ai-result-container').style.display = 'none';
+        document.getElementById('ai-loading').style.display = 'block';
+        document.getElementById('ai-success').style.display = 'none';
+        document.getElementById('ai-recommendation-text').innerHTML = '';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  }
+
+    document.getElementById('leadForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const userData = {
+            name: document.getElementById('name').value,
+            email: document.getElementById('email').value,
+            phone: document.getElementById('phone').value,
+            budget: parseInt(document.getElementById('budget').value, 10),
+            type: document.getElementById('type').value,
+            purpose: document.getElementById('purpose').value,
+            source: 'Main Portal'
+        };
+
+        document.getElementById('lead-form-card').style.display = 'none';
+        document.getElementById('ai-result-container').style.display = 'block';
+        document.getElementById('ai-loading').style.display = 'block';
+        document.getElementById('ai-success').style.display = 'none';
+        document.getElementById('ai-result-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        let initialRowCount = 0;
+        try {
+            const initialRes = await fetch(SHEET_CSV_URL + '&t=' + Date.now());
+            const initialText = await initialRes.text();
+            initialRowCount = parseCSV(initialText).length;
+        } catch (err) {
+            console.warn("Could not get initial row count.");
+        }
+
+        try {
+            await fetch(N8N_WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData)
+            });
+        } catch (error) {
+            console.error("Webhook error:", error);
+        }
+
+        startAIPolling(userData.email, initialRowCount);
+    });
+
+    let pollInterval;
+
+    function startAIPolling(userEmail, initialRowCount) {
+        let attempts = 0;
+        const maxAttempts = 20;
+
+        pollInterval = setInterval(async () => {
+            attempts++;
+            const foundData = await checkForNewLeadInSheet(userEmail, initialRowCount);
+
+            if (foundData) {
+                clearInterval(pollInterval);
+                displayRecommendation(foundData);
+            } else if (attempts >= maxAttempts) {
+                clearInterval(pollInterval);
+                document.getElementById('ai-loading').innerHTML =
+                    '<h3 style="color:var(--red);">Processing took longer than expected.</h3>' +
+                    '<p style="color:var(--muted);">Please check your email shortly for the full breakdown!</p>' +
+                    '<button onclick="resetForm()" class="restart-btn" style="margin-top:20px;">Try Again</button>';
+            }
+        }, 3000);
+    }
+
+    async function checkForNewLeadInSheet(targetEmail, initialRowCount) {
+        try {
+            const res = await fetch(SHEET_CSV_URL + '&t=' + Date.now());
+            const csvText = await res.text();
+            const rows = parseCSV(csvText);
+
+            if (rows.length <= initialRowCount) return null;
+
+            const headers = rows[0].map(function(h) { return h.toLowerCase().replace(/[^a-z0-9]/g, ''); });
+            const emailIdx = headers.findIndex(function(h) { return h.includes('email'); });
+            const recommendationIdx = headers.findIndex(function(h) { return h.includes('finalrecommendation') || h.includes('aioutput'); });
+
+            if (emailIdx === -1 || recommendationIdx === -1) return null;
+
+            const lastRow = rows[rows.length - 1];
+            const rowEmail = lastRow[emailIdx] ? lastRow[emailIdx].trim().toLowerCase() : '';
+
+            if (rowEmail === targetEmail.toLowerCase()) {
+                const recommendation = lastRow[recommendationIdx];
+                if (recommendation && recommendation.length > 10) return recommendation;
+            }
+            return null;
+        } catch (error) {
+            console.error("Error checking sheet:", error);
+            return null;
+        }
+    }
+
+    function displayRecommendation(text) {
+        document.getElementById('ai-loading').style.display = 'none';
+
+        var clean = text.replace(/^"|"$/g, '').replace(/""/g, '"');
+
+        // Tables
+        clean = clean.replace(/(\|.+\|\r?\n\|[-| :]+\|\r?\n)((?:\|.+\|\r?\n?)*)/gm, function(match, header, body) {
+            var ths = header.split('\n')[0].split('|').filter(function(c) { return c.trim(); })
+                .map(function(c) { return '<th style="padding:8px 12px;border:1px solid var(--border);background:var(--dark);text-align:left;font-size:13px;">' + c.trim() + '</th>'; }).join('');
+            var trs = body.trim().split('\n').map(function(row) {
+                var tds = row.split('|').filter(function(c) { return c.trim(); })
+                    .map(function(c) { return '<td style="padding:8px 12px;border:1px solid var(--border);font-size:13px;">' + c.trim() + '</td>'; }).join('');
+                return '<tr>' + tds + '</tr>';
+            }).join('');
+            return '<div style="overflow-x:auto;margin:14px 0;"><table style="width:100%;border-collapse:collapse;"><thead><tr>' + ths + '</tr></thead><tbody>' + trs + '</tbody></table></div>';
+        });
+
+        // Headings
+        clean = clean
+            .replace(/^### (.+)$/gm, '<div style="color:var(--red);margin:18px 0 4px;font-size:14px;letter-spacing:1px;font-weight:700;text-transform:uppercase;">$1</div>')
+            .replace(/^## (.+)$/gm, '<div style="color:var(--red);margin:20px 0 6px;font-size:16px;letter-spacing:1px;font-weight:700;text-transform:uppercase;">$1</div>')
+            .replace(/^# (.+)$/gm, '<div style="color:var(--red);margin:22px 0 8px;font-size:19px;letter-spacing:1px;font-weight:700;text-transform:uppercase;">$1</div>');
+
+        // Bold & italic
+        clean = clean.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        clean = clean.replace(/\*(.+?)\*/g, '<em>$1</em>');
+
+        // Numbered list
+        clean = clean.replace(/^\d+\.\s+(.+)$/gm, '<div style="margin:7px 0;padding-left:8px;"><span style="color:var(--red);font-weight:700;">&#9679;</span> <strong>$1</strong></div>');
+
+        // Bullets
+        clean = clean.replace(/^[\*\+\-]\s+(.+)$/gm, '<div style="margin:3px 0;padding-left:20px;color:var(--muted);">&#8594; $1</div>');
+
+        // Line breaks
+        clean = clean.replace(/\n/g, '<br>');
+
+        document.getElementById('ai-recommendation-text').innerHTML = clean;
+        document.getElementById('ai-success').style.display = 'block';
+        document.getElementById('ai-result-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function parseCSV(csvText) {
+        var rows = [], currentRow = [], currentCell = '', insideQuotes = false;
+        for (var i = 0; i < csvText.length; i++) {
+            var char = csvText[i], nextChar = csvText[i + 1];
+            if (char === '"') {
+                if (insideQuotes && nextChar === '"') { currentCell += '"'; i++; }
+                else { insideQuotes = !insideQuotes; }
+            } else if (char === ',' && !insideQuotes) {
+                currentRow.push(currentCell.trim()); currentCell = '';
+            } else if ((char === '\n' || char === '\r') && !insideQuotes) {
+                if (char === '\r' && nextChar === '\n') i++;
+                currentRow.push(currentCell.trim());
+                if (currentRow.some(function(cell) { return cell !== ''; })) rows.push(currentRow);
+                currentRow = []; currentCell = '';
+            } else { currentCell += char; }
+        }
+        if (currentRow.length > 0 || currentCell) { currentRow.push(currentCell.trim()); rows.push(currentRow); }
+        return rows;
+    }
 </script>
 </body>
 </html>

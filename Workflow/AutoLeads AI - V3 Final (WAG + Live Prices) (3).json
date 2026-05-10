@@ -1,0 +1,1377 @@
+{
+  "name": "AutoLeads AI - V3 Final (WAG + Live Prices)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "automotive-lead",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [
+        -4704,
+        96
+      ],
+      "id": "3f39d3a9-6ea1-4a29-badd-b5e02972d016",
+      "name": "Lead Intake Webhook",
+      "webhookId": "2f697714-9ca1-4191-8f4e-1b484bb7cd4c"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "name",
+              "value": "={{ $json.body.name }}",
+              "type": "string"
+            },
+            {
+              "id": "a2",
+              "name": "Budget",
+              "value": "={{ $json.body.budget }}",
+              "type": "string"
+            },
+            {
+              "id": "a3",
+              "name": "Type",
+              "value": "={{ $json.body.type }}",
+              "type": "string"
+            },
+            {
+              "id": "a4",
+              "name": "Purpose",
+              "value": "={{ $json.body.purpose }}",
+              "type": "string"
+            },
+            {
+              "id": "a5",
+              "name": "email",
+              "value": "={{ $json.body.email }}",
+              "type": "string"
+            },
+            {
+              "id": "a6",
+              "name": "phone",
+              "value": "={{ $json.body.phone }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -4480,
+        96
+      ],
+      "id": "6a68a36f-b46a-4a82-b703-c8b521d61e08",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://google.serper.dev/search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-KEY",
+              "value": "7c822a1127ce04f1b97ed75264b7dae5afd94d5b"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ {\n  \"q\": `latest ${$node['Edit Fields'].json.Type} cars in India ${$node['Edit Fields'].json.Budget} lakh 2024 2025 on-road price`,\n  \"gl\": \"in\",\n  \"num\": 5\n} }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -4256,
+        0
+      ],
+      "id": "8224db02-1bea-4fb1-8177-10e6835893ce",
+      "name": "WAG - Search Latest Models"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://google.serper.dev/news",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-KEY",
+              "value": "7c822a1127ce04f1b97ed75264b7dae5afd94d5b"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ {\n  \"q\": `${$node['Edit Fields'].json.Type} car launch price India 2025 new model`,\n  \"gl\": \"in\",\n  \"num\": 5\n} }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -4256,
+        192
+      ],
+      "id": "1fb83b4b-7bdb-465b-87e0-7068684254eb",
+      "name": "WAG - Search Latest News"
+    },
+    {
+      "parameters": {
+        "mode": "combineByPosition"
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        -4032,
+        96
+      ],
+      "id": "18b9ee2b-934f-477f-b78f-aeb76b791467",
+      "name": "Merge WAG Results"
+    },
+    {
+      "parameters": {
+        "jsCode": "\n// Safely extract search results and news into clean text context\nconst items = $input.all();\n\nlet searchData = \"\";\nlet newsData = \"\";\n\nfor (const item of items) {\n  // Organic results (from /search endpoint)\n  if (item.json.organic && Array.isArray(item.json.organic)) {\n    searchData = item.json.organic.slice(0, 4).map((r, i) => \n      `[Result ${i+1}] ${r.title || ''}: ${r.snippet || ''}`\n    ).join(\"\\n\");\n  }\n  // News results (from /news endpoint)\n  if (item.json.news && Array.isArray(item.json.news)) {\n    newsData = item.json.news.slice(0, 4).map((n, i) =>\n      `[News ${i+1}] ${n.title || ''}: ${n.snippet || ''} (${n.date || ''})`\n    ).join(\"\\n\");\n  }\n}\n\n// Pass through original lead data from Edit Fields\nconst lead = $('Edit Fields').item.json;\n\nreturn [{\n  json: {\n    name: lead.name,\n    Budget: lead.budget,\n    Type: lead.type,\n    Purpose: lead.purpose,\n    email: lead.email,\n    phone: lead.phone,\n    wag_search_context: searchData || \"No organic results found.\",\n    wag_news_context: newsData || \"No news results found.\"\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3808,
+        96
+      ],
+      "id": "283afe36-0147-4301-9f8a-b09dddc3c710",
+      "name": "Prepare WAG Context"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "groqApi",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "JSON",
+        "body": "={{ {\n  model: \"llama-3.3-70b-versatile\",\n  messages: [\n    {\n      role: \"system\",\n      content: \"You are an expert Indian automotive advisor. You MUST use the live web data provided. Never make up prices. If the data mentions a price, use it exactly. Format your answer with clear headings and bullet points.\"\n    },\n    {\n      role: \"user\",\n      content: `CUSTOMER PROFILE:\nName: ${$json.name}\nBudget: ${$json.Budget} lakh\nCar Type Wanted: ${$json.Type}\nPurpose: ${$json.Purpose}\n\n=== LIVE WEB SEARCH DATA (Use this for real prices) ===\n${$json.wag_search_context}\n\n=== LATEST NEWS & LAUNCHES (Use this for new models) ===\n${$json.wag_news_context}\n\nTASK: Based strictly on the live data above, recommend the TOP 3 best ${$json.Type} cars in India under ${$json.Budget} lakh for ${$json.Purpose}.\nFor each car give: Model name, exact on-road price from data, top 3 features, and pros/cons.\nIf a price is not in the data, say \"Price: Check latest at dealership\".`\n    }\n  ],\n  temperature: 0.4\n} }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -3584,
+        96
+      ],
+      "id": "c8c4161d-b2ff-4269-96d2-2452b258fbe5",
+      "name": "Car Recommender Agent (WAG)",
+      "credentials": {
+        "groqApi": {
+          "id": "K88czJwDkSJy0RCS",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "s1",
+              "name": "name",
+              "value": "={{$node['Edit Fields'].json.name}}",
+              "type": "string"
+            },
+            {
+              "id": "s2",
+              "name": "Budget",
+              "value": "={{$node['Edit Fields'].json.Budget}}",
+              "type": "string"
+            },
+            {
+              "id": "s3",
+              "name": "Type",
+              "value": "={{$node['Edit Fields'].json.Type}}",
+              "type": "string"
+            },
+            {
+              "id": "s4",
+              "name": "Purpose",
+              "value": "={{$node['Edit Fields'].json.Purpose}}",
+              "type": "string"
+            },
+            {
+              "id": "s5",
+              "name": "email",
+              "value": "={{$node['Edit Fields'].json.email}}",
+              "type": "string"
+            },
+            {
+              "id": "s6",
+              "name": "phone",
+              "value": "={{$node['Edit Fields'].json.phone}}",
+              "type": "string"
+            },
+            {
+              "id": "s7",
+              "name": "wag_search_context",
+              "value": "={{$node['Prepare WAG Context'].json.wag_search_context}}",
+              "type": "string"
+            },
+            {
+              "id": "s8",
+              "name": "wag_news_context",
+              "value": "={{$node['Prepare WAG Context'].json.wag_news_context}}",
+              "type": "string"
+            },
+            {
+              "id": "s9",
+              "name": "ai_output",
+              "value": "={{ $json.choices[0].message.content }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3360,
+        96
+      ],
+      "id": "d656f216-9686-45c7-81f4-a642f3489d15",
+      "name": "Store AI Output"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "groqApi",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "JSON",
+        "body": "={{ {\n  model: \"llama-3.3-70b-versatile\",\n  messages: [\n    {\n      role: \"user\",\n      content: `You are an expert car comparison analyst.\nCustomer: ${$json.name} | Budget: ${$json.Budget} lakh | Type: ${$json.Type} | Purpose: ${$json.Purpose}\n\nAI Recommendations (based on live data):\n${$json.ai_output}\n\nTask:\n1. Pick the SINGLE BEST car from the list above\n2. Create a clean comparison table (top 3 cars vs each other)\n3. Write a 2-line verdict explaining your winner choice\n4. Keep it structured and easy to read`\n    }\n  ],\n  temperature: 0.5\n} }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -3136,
+        96
+      ],
+      "id": "70f464a0-4187-4976-bc3a-34685480fda3",
+      "name": "Comparison Agent",
+      "credentials": {
+        "groqApi": {
+          "id": "K88czJwDkSJy0RCS",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fr1",
+              "name": "final_recommendation",
+              "value": "={{ $json.choices[0].message.content }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2912,
+        96
+      ],
+      "id": "64fd38f9-7953-40d9-a480-6e8c8f625832",
+      "name": "Final_recommendation"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "groqApi",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "JSON",
+        "body": "={{ {\n  model: \"llama-3.1-8b-instant\",\n  messages: [\n    {\n      role: \"user\",\n      content: `You are a strict lead scoring AI for an Indian car dealership.\nName: ${$node['Edit Fields'].json.name}\nBudget: ${$node['Edit Fields'].json.Budget} lakh\nPurpose: ${$node['Edit Fields'].json.Purpose}\n\nClassify as ONE of:\n- HOT LEAD (budget > 15L OR clear urgent family/business purpose)\n- WARM LEAD (budget 8-15L, standard purpose)\n- COLD LEAD (budget < 8L OR vague purpose)\n\nRespond EXACTLY like this:\nScore: [HOT/WARM/COLD] LEAD\nReason: [One sentence]`\n    }\n  ],\n  temperature: 0.1\n} }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -2688,
+        96
+      ],
+      "id": "c44bac37-74ef-4803-876a-bd4b1f99899c",
+      "name": "Lead Scoring Agent",
+      "credentials": {
+        "groqApi": {
+          "id": "K88czJwDkSJy0RCS",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ls1",
+              "name": "lead_score_analysis",
+              "value": "={{ $json.choices[0].message.content }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2464,
+        96
+      ],
+      "id": "2a46d96a-629d-4160-a3d1-0ee57916a886",
+      "name": "lead_score_analysis"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "groqApi",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "JSON",
+        "body": "={{ {\n  model: \"llama-3.1-8b-instant\",\n  messages: [\n    {\n      role: \"user\",\n      content: `You are an automotive sales expert. Write a SHORT WhatsApp message (max 3 lines) to invite ${$node['Edit Fields'].json.name} for a test drive. Their purpose: ${$node['Edit Fields'].json.Purpose}. Recommended car: ${$node['Final_recommendation'].json.final_recommendation.substring(0, 200)}. End with a friendly question about when they're free. Keep it warm, not salesy. Do NOT use Markdown formatting.Respond in plain text only. No HTML tags, no markdown, no asterisks. Use simple line breaks only.`\n    }\n  ],\n  temperature: 0.7\n} }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -2240,
+        96
+      ],
+      "id": "ba441b37-360f-4c6d-80ac-b0eb8f241dbe",
+      "name": "Test Drive Agent",
+      "credentials": {
+        "groqApi": {
+          "id": "K88czJwDkSJy0RCS",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "td1",
+              "name": "test_drive_message",
+              "value": "={{ $json.choices[0].message.content }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2016,
+        96
+      ],
+      "id": "5599b29e-ff40-4ab3-a153-8fb4b50f3006",
+      "name": "Test_drive_message"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "groqApi",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "JSON",
+        "body": "={{ {\n  model: \"llama-3.3-70b-versatile\",\n  messages: [\n    {\n      role: \"user\",\n      content: `You are a Sales Strategist. Customer: ${$node['Edit Fields'].json.name}, Budget: ${$node['Edit Fields'].json.Budget} lakh. Recommended car: ${$node['Final_recommendation'].json.final_recommendation.substring(0, 200)}.\n\nPredict the #1 biggest objection this customer will raise (e.g., price, mileage, resale value, maintenance cost).\nThen write a 2-sentence sales script for the dealer to overcome it.\n\nFormat:\nObjection: [The objection]\nScript: [2-sentence rebuttal]\n\nDo NOT use Markdown formatting. Respond in plain text only. No HTML tags, no markdown, no asterisks. Use simple line breaks only.`\n    }\n  ],\n  temperature: 0.7\n} }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -1792,
+        96
+      ],
+      "id": "3eab0624-d31b-4d5e-a6aa-2148cdc9852e",
+      "name": "Sales Objection Handler",
+      "credentials": {
+        "groqApi": {
+          "id": "K88czJwDkSJy0RCS",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ob1",
+              "name": "objection_cheat_sheet",
+              "value": "={{ $json.choices[0].message.content }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1568,
+        96
+      ],
+      "id": "dc22cfbc-bd3f-47de-9ba2-b184ed0f686c",
+      "name": "objection_cheat_sheet"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "groqApi",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "JSON",
+        "body": "={{ {\n  model: \"llama-3.1-8b-instant\",\n  messages: [\n    {\n      role: \"user\",\n      content: `You are a competitive intelligence expert.\nCustomer purpose: ${$node['Edit Fields'].json.Purpose}\nBudget: ${$node['Edit Fields'].json.Budget} lakh\nRecommended car info: ${$node['Final_recommendation'].json.final_recommendation.substring(0, 300)}\n\nLive market data:\n${$node['Prepare WAG Context'].json.wag_search_context}\n\nWrite exactly 3 short bullet points explaining why the recommended car beats its top 2 competitors. Use facts from the live data where possible. Keep each bullet under 20 words. Do NOT use Markdown formatting. Respond in plain text only. No HTML tags, no markdown, no asterisks. Use simple line breaks only.`\n    }\n  ],\n  temperature: 0.5\n} }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -4704,
+        400
+      ],
+      "id": "057d3176-2b36-46b5-b42d-f27f07ed1d09",
+      "name": "Competitor Intelligence Agent",
+      "credentials": {
+        "groqApi": {
+          "id": "K88czJwDkSJy0RCS",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ci1",
+              "name": "competitor_insight",
+              "value": "={{ $json.choices[0].message.content }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -4544,
+        400
+      ],
+      "id": "55702f37-3807-4341-9569-fde70b562fc0",
+      "name": "competitor_insight"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "groqApi",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "JSON",
+        "body": "={{ {\n  model: \"llama-3.1-8b-instant\",\n  messages: [\n    {\n      role: \"user\",\n      content: `You are a friendly follow-up specialist at a car dealership. We sent ${$node['Edit Fields'].json.name} a test drive invite 2 days ago but haven't heard back. Write a SHORT 2-line WhatsApp follow-up. Mention the car type (${$node['Edit Fields'].json.Type}). Be warm, NOT pushy. End by asking if they have any questions. Do NOT use Markdown formatting. Respond in plain text only. No HTML tags, no markdown, no asterisks. Use simple line breaks only.Respond in plain text only. No HTML tags, no markdown, no asterisks. Use simple line breaks only.`\n    }\n  ],\n  temperature: 0.7\n} }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -4320,
+        400
+      ],
+      "id": "e04b0352-b8f4-4630-9996-671c7975c495",
+      "name": "Follow-Up Message Agent",
+      "credentials": {
+        "groqApi": {
+          "id": "K88czJwDkSJy0RCS",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fm1",
+              "name": "follow_up_message",
+              "value": "={{ $json.choices[0].message.content }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -4096,
+        400
+      ],
+      "id": "b3643188-e4bc-4935-87e8-5d51ac4cc9e0",
+      "name": "follow_up_message"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "bn1",
+              "name": "budget_num",
+              "value": "={{ $('Edit Fields').item.json.Budget }}",
+              "type": "number"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {
+          "ignoreConversionErrors": false
+        }
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3872,
+        400
+      ],
+      "id": "1af6514c-22c7-4749-9d83-d5d1a71e7a8f",
+      "name": "budget_num"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "cond-01",
+              "leftValue": "={{ $json.budget_num }}",
+              "rightValue": 2000000,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -3648,
+        400
+      ],
+      "id": "8481ba28-e9fc-4a0d-98f3-6d03ff10774f",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\"lead_type\": \"HIGH_BUDGET\"}",
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3424,
+        352
+      ],
+      "id": "ed910064-8b0d-4511-846a-8c74eebf86d1",
+      "name": "TRUE PATH (High budget)"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\"lead_type\": \"LOW_BUDGET\"}",
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3424,
+        496
+      ],
+      "id": "11331235-3d9d-4113-bffa-4c69c3a0de45",
+      "name": "FALSE PATH (Low budget)"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1Zg7i0CMYtlmS1V0bpP5AxU07Hlr2GiklQdnDbvjlD9k/edit?usp=sharing",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Zg7i0CMYtlmS1V0bpP5AxU07Hlr2GiklQdnDbvjlD9k/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "name": "={{ $node['Edit Fields'].json.name }}",
+            "Budget": "={{ $node['Edit Fields'].json.Budget }}",
+            "Type": "={{ $node['Edit Fields'].json.Type }}",
+            "Purpose": "={{ $node['Edit Fields'].json.Purpose }}",
+            "email": "={{ $node['Edit Fields'].json.email }}",
+            "phone": "={{ $node['Edit Fields'].json.phone }}",
+            "lead_type": "={{ $json.lead_type }}",
+            "budget_num": "={{ $json.budget_num }}",
+            "ai_output": "={{ $('Store AI Output').item.json.ai_output }}",
+            "final_recommendation": "={{ $('Final_recommendation').item.json.final_recommendation }}",
+            "lead_score_analysis": "={{ $('lead_score_analysis').item.json.lead_score_analysis }}",
+            "test_drive_message": "={{ $('Test_drive_message').item.json.test_drive_message }}",
+            "objection_cheat_sheet": "={{ $('objection_cheat_sheet').item.json.objection_cheat_sheet }}",
+            "competitor_insight": "={{ $('competitor_insight').item.json.competitor_insight }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Budget",
+              "displayName": "Budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Type",
+              "displayName": "Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Purpose",
+              "displayName": "Purpose",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ai_output",
+              "displayName": "ai_output",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "lead_type",
+              "displayName": "lead_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "budget_num",
+              "displayName": "budget_num",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "final_recommendation",
+              "displayName": "final_recommendation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "lead_score_analysis",
+              "displayName": "lead_score_analysis",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "test_drive_message",
+              "displayName": "test_drive_message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "objection_cheat_sheet",
+              "displayName": "objection_cheat_sheet",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "competitor_insight",
+              "displayName": "competitor_insight",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "follow_up_message ",
+              "displayName": "follow_up_message ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -3200,
+        400
+      ],
+      "id": "2bf423c4-125e-411c-aed1-ef9e73287103",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "UiUbjU7VVQb1CtNg",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v19.0/1106615305874500/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ {\n  \"messaging_product\": \"whatsapp\",\n  \"to\": $node['Edit Fields'].json.phone,\n  \"type\": \"text\",\n  \"text\": {\n    \"body\": $('Test_drive_message').item.json.test_drive_message\n  }\n} }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -2976,
+        400
+      ],
+      "id": "d1fa90b0-52ad-4907-9732-de4f529b3a70",
+      "name": "Send WhatsApp Test Drive",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "25XTTLtMIV5BKebW",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst name = $('Edit Fields').item.json.name;\nconst budgetRaw = $('Edit Fields').item.json.budget;\nconst budgetMap = {500000:'Under Rs.5 Lakhs',700000:'Rs.5–7 Lakhs',1000000:'Rs.7–10 Lakhs',1500000:'Rs.10–15 Lakhs',2000000:'Rs.15–20 Lakhs',3000000:'Rs.20–30 Lakhs',5000000:'Rs.30–50 Lakhs',7500000:'Rs.50–75 Lakhs',10000000:'Above Rs.1 Crore'};\nconst budget = budgetMap[budgetRaw] || 'Rs.' + (budgetRaw/100000) + ' Lakhs';\nconst carType = $('Edit Fields').item.json.type;\nconst purpose = $('Edit Fields').item.json.purpose;\nconst recommendation = $('Final_recommendation').item.json.final_recommendation\n  .replace(/^### (.+)$/gm, '<h3 style=\"color:#e94560;margin:14px 0 4px;font-size:14px;\">$1</h3>')\n  .replace(/^## (.+)$/gm, '<h2 style=\"color:#e94560;margin:16px 0 6px;font-size:16px;\">$1</h2>')\n  .replace(/\\*\\*(.*?)\\*\\*/g, '<strong>$1</strong>')\n  .replace(/^\\d+\\. (.+)$/gm, '<div style=\"margin:6px 0;padding-left:10px;\"><strong>●</strong> $1</div>')\n  .replace(/^[\\*\\+\\-] (.+)$/gm, '<div style=\"margin:3px 0;padding-left:18px;color:#555;\">→ $1</div>')\n  .replace(/\\n/g, '<br>');\nconst competitorInsight = $('competitor_insight').item.json.competitor_insight\n  .replace(/^### (.+)$/gm, '<h3 style=\"color:#0f3460;margin:12px 0 4px;font-size:14px;\">$1</h3>')\n  .replace(/\\*\\*(.*?)\\*\\*/g, '<strong>$1</strong>')\n  .replace(/^[\\*\\+\\-] (.+)$/gm, '<div style=\"margin:3px 0;padding-left:18px;color:#555;\">→ $1</div>')\n  .replace(/\\n/g, '<br>');\nconst score = $('lead_score_analysis').item.json.lead_score_analysis;\n\nconst html = `<!DOCTYPE html>\n<html>\n<head>\n<style>\n  body { font-family: Arial, sans-serif; background: #f4f6fa; margin: 0; padding: 24px; color: #333; }\n  .page { max-width: 680px; margin: 0 auto; background: #fff; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.10); }\n  .header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 36px; text-align: center; }\n  .header h1 { color: #e94560; font-size: 26px; margin: 0 0 8px; letter-spacing: 1px; }\n  .header p { color: #a8b2d8; margin: 0; font-size: 14px; }\n  .section { padding: 24px 32px; border-bottom: 1px solid #eee; }\n  .section:last-child { border-bottom: none; }\n  .section h2 { color: #0f3460; font-size: 15px; margin: 0 0 10px; text-transform: uppercase; letter-spacing: 0.5px; }\n  .section p { color: #444; line-height: 1.75; font-size: 14px; margin: 0; }\n  .tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }\n  .tag { background: #f0f4ff; color: #0f3460; border-radius: 20px; padding: 4px 14px; font-size: 12px; font-weight: 600; }\n  .score-box { background: #e94560; color: #fff; padding: 18px 32px; text-align: center; font-weight: bold; font-size: 15px; }\n  .footer { padding: 16px; text-align: center; color: #aaa; font-size: 11px; }\n</style>\n</head>\n<body>\n<div class=\"page\">\n  <div class=\"header\">\n    <h1>&#x1F697; AutoLeads AI — Your Car Report</h1>\n    <p>Personalised for ${name} &nbsp;|&nbsp; Powered by Live Web Data</p>\n  </div>\n  <div class=\"section\">\n    <h2>Your Requirements</h2>\n    <div class=\"tags\">\n      <span class=\"tag\">Budget: ${budget} Lakh</span>\n      <span class=\"tag\">Type: ${carType}</span>\n      <span class=\"tag\">Purpose: ${purpose}</span>\n    </div>\n  </div>\n  <div class=\"section\">\n    <h2>&#x1F3C6; AI Recommendation (Live Market Data)</h2>\n    <p>${recommendation}</p>\n  </div>\n  <div class=\"section\">\n    <h2>&#x26A1; Why It Beats the Competition</h2>\n    <p>${competitorInsight}</p>\n  </div>\n  <div class=\"score-box\">Lead Status: ${score}</div>\n  <div class=\"footer\">Generated by AutoLeads AI &nbsp;|&nbsp; n8n + Groq + Serper Web Search</div>\n</div>\n</body>\n</html>`;\n\nconst buffer = Buffer.from(html);\nreturn {\n  json: $input.item.json,\n  binary: {\n    attachment: {\n      data: buffer.toString('base64'),\n      mimeType: 'text/html',\n      fileName: 'AutoLeads_Car_Report.html'\n    }\n  }\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2752,
+        400
+      ],
+      "id": "b4e8a5c2-967a-47a4-9d63-26f3e6f803ec",
+      "name": "Generate PDF Brochure"
+    },
+    {
+      "parameters": {
+        "authentication": "apiKey",
+        "outputFormat": "pdf",
+        "inputBinaryPropertyName": "attachment"
+      },
+      "type": "@cloudconvert/n8n-nodes-cloudconvert.cloudConvert",
+      "typeVersion": 1,
+      "position": [
+        -2528,
+        400
+      ],
+      "id": "00a1c727-0414-4e3a-b256-4436a161c9ef",
+      "name": "Convert HTML to PDF",
+      "credentials": {
+        "cloudConvertApi": {
+          "id": "rlzIufGnAL31TTJz",
+          "name": "CloudConvert account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $node['Edit Fields'].json.email }}",
+        "subject": "=🚗 Your Personalised Car Report — {{ $node['Edit Fields'].json.Type }} Under {{ $node['Edit Fields'].json.Budget }} Lakh",
+        "message": "=<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f9f9f9; padding: 20px;\">\n  <div style=\"background: linear-gradient(135deg, #1a1a2e, #16213e); padding: 30px; border-radius: 12px; text-align: center;\">\n    <h1 style=\"color: #e94560; margin: 0;\">🚗 Your Perfect Car Awaits</h1>\n    <p style=\"color: #a8b2d8; margin-top: 8px;\">Personalised for {{ $node[\"Edit Fields\"].json.name }}</p>\n  </div>\n  <div style=\"background: white; padding: 24px; border-radius: 12px; margin-top: 16px; border-left: 4px solid #e94560;\">\n    <h2 style=\"color: #1a1a2e; margin-top: 0;\">🏆 Our Top Recommendation</h2>\n    <p style=\"color: #444; line-height: 1.7; font-size: 14px;\">{{ $('Final_recommendation').item.json.final_recommendation\n  .replace(/### (.*?)(\\n|$)/g, '<h3 style=\"color:#e94560;margin:12px 0 4px;\">$1</h3>')\n  .replace(/## (.*?)(\\n|$)/g, '<h2 style=\"color:#e94560;margin:14px 0 6px;\">$2</h2>')\n  .replace(/\\*\\*(.*?)\\*\\*/g, '<strong>$1</strong>')\n  .replace(/^\\* (.+)$/gm, '<div style=\"padding-left:12px;\">→ $1</div>')\n  .replace(/^\\+ (.+)$/gm, '<div style=\"padding-left:12px;\">→ $1</div>')\n  .replace(/^\\d+\\. (.+)$/gm, '<div style=\"padding-left:12px;margin:4px 0;\">● $1</div>')\n  .replace(/\\n/g, '<br>') }}</p>\n  </div>\n  <div style=\"background: white; padding: 24px; border-radius: 12px; margin-top: 12px; border-left: 4px solid #0f3460;\">\n    <h2 style=\"color: #1a1a2e; margin-top: 0;\">⚡ Why It Beats the Competition</h2>\n    <p style=\"color: #444; line-height: 1.7; font-size: 14px;\">{{ $('competitor_insight').item.json.competitor_insight\n  .replace(/\\*\\*(.*?)\\*\\*/g, '<strong>$1</strong>')\n  .replace(/^\\* (.+)$/gm, '<div style=\"padding-left:12px;\">→ $1</div>')\n  .replace(/\\n/g, '<br>') }}</p>\n  </div>\n  <div style=\"background: #e94560; padding: 20px; border-radius: 12px; margin-top: 12px; text-align: center;\">\n    <h3 style=\"color: white; margin: 0 0 8px 0;\">🎯 Book Your Test Drive</h3>\n    <p style=\"color: #ffd1d8; margin: 0; font-size: 14px;\">{{ $('Test_drive_message').item.json.test_drive_message }}</p>\n  </div>\n  <div style=\"background: white; padding: 16px; border-radius: 12px; margin-top: 12px; text-align: center; border: 2px dashed #e94560;\">\n    <p style=\"margin: 0; font-size: 13px; color: #555;\">📄 <strong>Your full AI car report is attached as a PDF.</strong> It includes a live market comparison and competitor analysis.</p>\n  </div>\n  <p style=\"text-align: center; color: #aaa; font-size: 11px; margin-top: 16px;\">AutoLeads AI · n8n + Groq + Live Web Search</p>\n</div>",
+        "options": {
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {}
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -2304,
+        400
+      ],
+      "id": "b9d11b78-7e26-484e-a6d3-14a734af891d",
+      "name": "Send Gmail with PDF",
+      "webhookId": "68125dad-9ea2-407a-9951-d9d3bd2030ea",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "LJkqZJ0d0MsiFWUW",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 2,
+        "unit": "minutes"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -2080,
+        400
+      ],
+      "id": "8e5b4aad-0c63-4f20-b95a-88628af27617",
+      "name": "Wait 2 Min (change to days for production)",
+      "webhookId": "wait-webhook-001"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v19.0/1106615305874500/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ {\n  \"messaging_product\": \"whatsapp\",\n  \"to\": $node['Edit Fields'].json.phone,\n  \"type\": \"text\",\n  \"text\": {\n    \"body\": $('follow_up_message').item.json.follow_up_message\n  }\n} }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -1856,
+        400
+      ],
+      "id": "0bacfb7f-2b07-4233-a989-ce728ed72929",
+      "name": "Follow-Up WhatsApp",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "25XTTLtMIV5BKebW",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $node['Edit Fields'].json.email }}",
+        "subject": "=Still Thinking? Your {{ $node['Edit Fields'].json.Type }} is Waiting 🚗",
+        "message": "=<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;\">\n  <div style=\"background: linear-gradient(135deg, #0f3460, #16213e); padding: 30px; border-radius: 12px; text-align: center;\">\n    <h1 style=\"color: #e94560; margin: 0;\">👋 Still Interested, {{ $node[\"Edit Fields\"].json.name }}?</h1>\n  </div>\n  <div style=\"background: white; padding: 24px; border-radius: 12px; margin-top: 16px;\">\n    <p style=\"color: #444; font-size: 15px; line-height: 1.7;\">{{ $('follow_up_message').item.json.follow_up_message }}</p>\n    <hr style=\"border: none; border-top: 1px solid #eee; margin: 20px 0;\">\n    <p style=\"color: #666; font-size: 13px;\">As a reminder, here was our recommendation:</p>\n    <p style=\"color: #1a1a2e; font-size: 13px; line-height: 1.6;\">{{ $('Final_recommendation').item.json.final_recommendation }}</p>\n  </div>\n  <p style=\"text-align: center; color: #aaa; font-size: 11px; margin-top: 16px;\">AutoLeads AI · Powered by n8n</p>\n</div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -1632,
+        400
+      ],
+      "id": "c00915ea-4060-4eda-88e0-cfac028d3637",
+      "name": "Follow-Up Gmail",
+      "webhookId": "6600106c-ff05-4c2a-819a-0495e5e9a50e",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "LJkqZJ0d0MsiFWUW",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Lead Intake Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "WAG - Search Latest Models",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "WAG - Search Latest News",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WAG - Search Latest Models": {
+      "main": [
+        [
+          {
+            "node": "Merge WAG Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WAG - Search Latest News": {
+      "main": [
+        [
+          {
+            "node": "Merge WAG Results",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge WAG Results": {
+      "main": [
+        [
+          {
+            "node": "Prepare WAG Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare WAG Context": {
+      "main": [
+        [
+          {
+            "node": "Car Recommender Agent (WAG)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Car Recommender Agent (WAG)": {
+      "main": [
+        [
+          {
+            "node": "Store AI Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store AI Output": {
+      "main": [
+        [
+          {
+            "node": "Comparison Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Comparison Agent": {
+      "main": [
+        [
+          {
+            "node": "Final_recommendation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Final_recommendation": {
+      "main": [
+        [
+          {
+            "node": "Lead Scoring Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lead Scoring Agent": {
+      "main": [
+        [
+          {
+            "node": "lead_score_analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "lead_score_analysis": {
+      "main": [
+        [
+          {
+            "node": "Test Drive Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Test Drive Agent": {
+      "main": [
+        [
+          {
+            "node": "Test_drive_message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Test_drive_message": {
+      "main": [
+        [
+          {
+            "node": "Sales Objection Handler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sales Objection Handler": {
+      "main": [
+        [
+          {
+            "node": "objection_cheat_sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "objection_cheat_sheet": {
+      "main": [
+        [
+          {
+            "node": "Competitor Intelligence Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Competitor Intelligence Agent": {
+      "main": [
+        [
+          {
+            "node": "competitor_insight",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "competitor_insight": {
+      "main": [
+        [
+          {
+            "node": "Follow-Up Message Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Follow-Up Message Agent": {
+      "main": [
+        [
+          {
+            "node": "follow_up_message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "follow_up_message": {
+      "main": [
+        [
+          {
+            "node": "budget_num",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "budget_num": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "TRUE PATH (High budget)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "FALSE PATH (Low budget)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TRUE PATH (High budget)": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FALSE PATH (Low budget)": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send WhatsApp Test Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send WhatsApp Test Drive": {
+      "main": [
+        [
+          {
+            "node": "Generate PDF Brochure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate PDF Brochure": {
+      "main": [
+        [
+          {
+            "node": "Convert HTML to PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert HTML to PDF": {
+      "main": [
+        [
+          {
+            "node": "Send Gmail with PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Gmail with PDF": {
+      "main": [
+        [
+          {
+            "node": "Wait 2 Min (change to days for production)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 2 Min (change to days for production)": {
+      "main": [
+        [
+          {
+            "node": "Follow-Up WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Follow-Up WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Follow-Up Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Follow-Up Gmail": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "2892085b-90ec-46fa-8b07-f4912e7ed1f8",
+  "meta": {
+    "instanceId": "658bfa3b3f72411541bb161011b09d0a0b3294ba7fc1e6eabf57b83d67f2e50a"
+  },
+  "id": "85qeRIETinjVMgLf",
+  "tags": []
+}

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AutoLeads AI — Login</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="wrapper">
+  <div class="brand-section">
+    <div class="brand-logo">AutoLeads</div>
+    <div class="brand-tag">AI-Powered Car Dealership Platform</div>
+    <div class="brand-accent"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Welcome Back</div>
+    <div class="card-sub">Login to access your AI dashboard.</div>
+
+    <div class="field">
+      <label>Email ID</label>
+      <input type="email" id="email" placeholder="admin@autoleads.ai" required onkeypress="if(event.key==='Enter') login()">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="password" placeholder="••••••••" required onkeypress="if(event.key==='Enter') login()">
+    </div>
+
+    <button class="submit-btn" id="loginBtn" onclick="login()">
+      <span id="btnInner">→ &nbsp;Login</span>
+    </button>
+
+    <div class="error-msg" id="errorMsg"></div>
+
+    <div class="divider"></div>
+
+    <div class="demo-creds">
+      <strong style="color:var(--text);font-size:11px;letter-spacing:1px;text-transform:uppercase;">Demo Credentials</strong><br>
+      Email: <code>admin@autoleads.ai</code><br>
+      Password: <code>admin123</code>
+    </div>
+  </div>
+</div>
+
+<script>
+async function login() {
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const btn = document.getElementById('loginBtn');
+  const errBox = document.getElementById('errorMsg');
+  errBox.style.display = 'none';
+
+  if (!email || !password) { showError('Please enter both email and password.'); return; }
+
+  btn.disabled = true;
+  document.getElementById('btnInner').innerHTML = `<span class="spinner"></span>&nbsp;Authenticating...`;
+
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (data.success) {
+      localStorage.setItem('autoleads_jwt', data.token);
+      window.location.href = data.redirect || '/dashboard';
+    } else {
+      showError('❌ ' + (data.message || 'Invalid credentials.'));
+      btn.disabled = false;
+      document.getElementById('btnInner').innerHTML = `→ &nbsp;Login`;
+    }
+  } catch {
+    showError('⚠️ Server offline. Run npm run dev first.');
+    btn.disabled = false;
+    document.getElementById('btnInner').innerHTML = `→ &nbsp;Login`;
+  }
+}
+
+function showError(msg) {
+  const el = document.getElementById('errorMsg');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+</script>
+</body>
+</html>
