@@ -164,6 +164,12 @@ Automatically generates polite follow-up communication for inactive leads.
 * Google Sheets integration
 * Customer scoring system
 * Sales intelligence generation
+* Admin panel with system toggles
+* JWT-based login flow (frontend)
+* Unified design system across UI
+* Live Google Sheets auto-refresh
+* Robust CSV parser for multi-line AI output
+* CSV export from dashboard
 
 ---
 
@@ -219,13 +225,17 @@ The project includes:
 * real-time analytics dashboard
 * lead distribution metrics
 * automotive demand visualization
+* admin settings panel
+* login screen with JWT-based flow
 
 Dashboard capabilities:
 
 * total leads tracking
 * hot/warm/cold lead distribution
 * vehicle category analytics
-* live CRM updates
+* live Google Sheets updates (auto-refresh)
+* CSV export
+* lead search and filtering
 
 ---
 
@@ -234,21 +244,26 @@ Dashboard capabilities:
 ```text
 AI-Automotive-Recommendation-Agent/
 │
-├── workflow/
+├── Workflow/
 │   └── Automotive Agent Final.json
 │
-├── frontend/
+├── Frontend/
 │   ├── index.html
-│   └── dashboard.html
+│   ├── login.html
+│   ├── dashboard.html
+│   ├── admin.html
+│   └── styles.css
 │
-├── screenshots/
+├── server.js
+│
+├── Screenshots/
 │   ├── workflow.png
 │   ├── dashboard.png
 │   ├── sheets.png
 │   ├── gmail.png
 │   └── whatsapp.png
 │
-├── README.md
+├── Readme.md
 │
 └── demo-video-link.txt
 ```
@@ -295,7 +310,7 @@ Configure the following credentials in n8n:
 Inside:
 
 ```text
-frontend/index.html
+Frontend/index.html
 ```
 
 Update:
@@ -307,13 +322,23 @@ WEBHOOK_URL = "YOUR_N8N_WEBHOOK_URL"
 Inside:
 
 ```text
-frontend/dashboard.html
+Frontend/dashboard.html
 ```
 
 Update:
 
 ```javascript
-CSV_URL = "YOUR_GOOGLE_SHEET_CSV_URL"
+SHEET_SOURCE_URL = "YOUR_GOOGLE_SHEET_LINK"
+```
+
+---
+
+## 5. Optional: Run Backend Server
+
+The backend is optional for UI-only usage. If you want to use server endpoints and WebSocket utilities:
+
+```bash
+node server.js
 ```
 
 ---
